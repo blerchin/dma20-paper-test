@@ -135,10 +135,10 @@ var y =0;
 var mouseEasing = 0.02;
 var targetX =0;
 var targetY =0;
-var forceFactor = 1.5;
+var forceFactor = 2;
 
 function calcRadius() {
-	var viewArea = view.size.width * view.size.height * 0.5;
+	var viewArea = view.size.width * view.size.height * 0.9;
 	var radius = Math.sqrt((viewArea / numBalls - 1) / Math.PI);
 	radius = Math.random() * 20 + radius;
 	return radius;
