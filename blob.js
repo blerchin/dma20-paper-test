@@ -229,10 +229,10 @@ function onMouseMove(event) {
 		event.item.selected = true;
 		var h1= $("#bg-title").text(event.item.artist.name.toUpperCase());
 		h1.html(h1.html().replace(/\s/g,'<br>'));
-
 	}
 	else{
-		$("#bg-title").text("NEAREST NEIGHBOR");
+		var h1 = $("#bg-title").text("NEAR REST \n NEIGHBOR");
+		h1.html(h1.html().replace(/\n/g,'<br>'));
 	}
 
 	// for (var i = 0; i < balls.length; i++) {
