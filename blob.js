@@ -146,13 +146,14 @@ var balls = [];
 var numBalls = 11;
 var x = 0;
 var y = 0;
-var mouseEasing = 0.01;
+var defaultEasing = 0.02;
 var targetX = 0;
 var targetY = 0;
 var forceFactor = 2;
 var mouseBall;
 var lasHover;
-var opacity = 0.5;
+var opacity = 0.7;
+var simInProgress = true;
 
 function calcRadius() {
 	var viewArea = view.size.width * view.size.height * 0.9;
@@ -162,7 +163,7 @@ function calcRadius() {
 }
 
 function setup() {
-	mouseBall = new Ball(calcRadius(), new Point(0,0), new Point(0,0));
+	mouseBall = new Ball(calcRadius(), new Point(0, 0), new Point(0, 0));
 	balls.push(mouseBall);
 
 	balls[0].radius = calcRadius() * forceFactor;
@@ -191,6 +192,7 @@ function setup() {
 }
 
 function onFrame() {
+
 	for (var i = 0; i < balls.length - 1; i++)
 		for (var j = i + 1; j < balls.length; j++)
 			balls[i].react(balls[j]);
@@ -203,11 +205,17 @@ function onFrame() {
 
 	balls[0].updateShape();
 
+
+
 	// Mouse Easing
+	var easeFactor = defaultEasing;
+	if (!simInProgress) {
+		easeFactor /= 10;
+	}
 	var dx = targetX - x;
-	x += dx * mouseEasing;
+	x += dx * easeFactor;
 	var dy = targetY - y;
-	y += dy * mouseEasing;
+	y += dy * easeFactor;
 
 	// Move the hidden/mouse blob 
 	balls[0].point = new Point(x, y);
@@ -227,23 +235,25 @@ function onMouseMove(event) {
 	targetY = mousePos.y;
 
 	project.activeLayer.selected = false;
+
 	if (event.item && !event.item.isMouse) {
+		simInProgress = false;
 		for (var i = 1, l = balls.length; i < l; i++) {
 			balls[i].path.opacity = 0;
 		}
 		lasHover = event.item;
 		// event.item.selected = true;
 		event.item.opacity = 1;
-		var h1= $("#bg-title").text(event.item.artist.name.toUpperCase());
-		h1.html(h1.html().replace(/\s/g,'<br>'));
-	}
-	else{
+		var h1 = $("#bg-title").text(event.item.artist.name.toUpperCase());
+		h1.html(h1.html().replace(/\s/g, '<br>'));
+	} else {
+		simInProgress = true;
 		lasHover.opacity = opacity;
 		for (var i = 1, l = balls.length; i < l; i++) {
 			balls[i].path.opacity = opacity;
 		}
 		var h1 = $("#bg-title").text("NEAR REST \n NEIGHBOR");
-		h1.html(h1.html().replace(/\n/g,'<br>'));
+		h1.html(h1.html().replace(/\n/g, '<br>'));
 	}
 
 	// for (var i = 0; i < balls.length; i++) {
