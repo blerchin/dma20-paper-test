@@ -149,7 +149,7 @@ var y = 0;
 var defaultEasing = 0.02;
 var targetX = 0;
 var targetY = 0;
-var forceFactor = 2;
+var forceFactor =1.5;
 var mouseBall;
 var lasHover;
 var opacity = 0.7;
