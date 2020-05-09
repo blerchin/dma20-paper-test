@@ -227,7 +227,9 @@ function onMouseMove(event) {
 	project.activeLayer.selected = false;
 	if (event.item && !event.item.isMouse) {
 		event.item.selected = true;
-		$("#bg-title").text(event.item.artist.name.toUpperCase());
+		var h1= $("#bg-title").text(event.item.artist.name.toUpperCase());
+		h1.html(h1.html().replace(/\s/g,'<br>'));
+
 	}
 	else{
 		$("#bg-title").text("NEAREST NEIGHBOR");
