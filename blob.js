@@ -4,21 +4,27 @@ function Ball(r, p, v) {
 	this.radius = r;
 	this.point = p;
 	this.vector = v;
-	this.gravity = 3;
+	this.gravity = 9.8;
 	this.dampen = 0.4;
 	this.bounce = 0;
 	this.maxVec = 15;
-	this.numSegment = Math.floor(r / 5);
+	this.numSegment = Math.floor(r / 3);
 	this.boundOffset = [];
 	this.boundOffsetBuff = [];
 	this.sidePoints = [];
 	this.path = new Path({
 		fillColor: {
-			hue: Math.random() * 360,
-			saturation: 1,
-			brightness: 1
+			gradient: {
+				stops: ['white', '#333'],
+				radial: true
+			},
+			origin: this.point,
+			destination: this.point + [this.radius, 0],
 		},
-		blendMode: 'normal'
+		blendMode: 'normal',
+		strokeColor: '#000',
+		strokeWidth: 0,
+		closed: true
 	});
 
 	for (var i = 0; i < this.numSegment; i++) {
@@ -44,6 +50,12 @@ Ball.prototype = {
 		this.updateShape();
 	},
 
+	updateColor: function () {
+		this.path.fillColor.origin = this.path.position;
+		this.path.fillColor.destination = this.path.bounds.rightCenter;
+		this.path.fillColor.radial = true;
+	},
+
 	checkBorders: function () {
 		var size = view.size;
 		var pre = this.point + this.vector;
@@ -64,6 +76,7 @@ Ball.prototype = {
 			var next = (i + 1) % this.numSegment;
 			var prev = (i > 0) ? i - 1 : this.numSegment - 1;
 			var offset = this.boundOffset[i];
+
 			offset += (this.radius - offset) / 15;
 			offset += ((this.boundOffset[next] + this.boundOffset[prev]) / 2 - offset) / 3;
 			this.boundOffsetBuff[i] = this.boundOffset[i] = offset;
@@ -117,18 +130,20 @@ Ball.prototype = {
 
 var balls = [];
 var numBalls = 12;
+var area = view.size.width * view.size.height * 0.5;
+var radius = Math.sqrt((area / numBalls - 1) / Math.PI);
+radius = Math.random() * 20 + radius;
+
 for (var i = 0; i < numBalls; i++) {
 	var position = Point.random() * view.size;
 	var vector = new Point({
 		angle: 1 * Math.random(),
 		length: Math.random() * 10
 	});
-	// var radius = 110;
-	var radius = Math.random() * 20 + 90;
 	balls.push(new Ball(radius, position, vector));
 }
 
-balls[0].radius = 150;
+balls[0].radius = radius *2;
 balls[0].path.opacity = 0;
 
 
@@ -145,7 +160,7 @@ function onMouseMove(event) {
 
 function onFrame() {
 	for (var i = 0; i < balls.length - 1; i++) {
-		for (var j = i+1; j < balls.length; j++) {
+		for (var j = i + 1; j < balls.length; j++) {
 			if (i == j)
 				continue;
 			balls[i].react(balls[j]);
@@ -153,7 +168,18 @@ function onFrame() {
 	}
 	for (var i = 1, l = balls.length; i < l; i++) {
 		balls[i].iterate();
+		balls[i].updateColor();
 	}
 
 	balls[0].updateShape();
+}
+
+function onResize() {
+	for (var i = 0, l = balls.length; i < l; i++) {
+		area = view.size.width * view.size.height * 0.5;
+		radius = Math.sqrt((area / numBalls - 1) / Math.PI);
+		radius = Math.random() * 20 + radius;
+		balls[i].radius = radius;
+	}
+	balls[0].radius = radius *2;
 }
