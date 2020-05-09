@@ -1,5 +1,19 @@
 // kynd.info 2014
 
+var artists = [
+	"Zeynep Abes",
+	"Graham Akins",
+	"Berfin Ataman",
+	"Erin Cooney",
+	"Clara Leivas",
+	"Ben Lerchin",
+	"Blaine O'Neill",
+	"Miles Peyton",
+	"Hirad Sab",
+	"Dalena Tran",
+	"Leming Z/C",
+];
+
 function Ball(r, p, v) {
 	this.radius = r;
 	this.point = p;
@@ -129,34 +143,49 @@ Ball.prototype = {
 //--------------------- main ---------------------
 
 var balls = [];
-var numBalls = 12;
-var x =0;
-var y =0;
-var mouseEasing = 0.02;
-var targetX =0;
-var targetY =0;
+var numBalls = 11;
+var x = 0;
+var y = 0;
+var mouseEasing = 0.01;
+var targetX = 0;
+var targetY = 0;
 var forceFactor = 2;
+var mouseBall;
 
 function calcRadius() {
 	var viewArea = view.size.width * view.size.height * 0.9;
-	var radius = Math.sqrt((viewArea / numBalls - 1) / Math.PI);
+	var radius = Math.sqrt((viewArea / numBalls) / Math.PI);
 	radius = Math.random() * 20 + radius;
 	return radius;
 }
 
 function setup() {
+	mouseBall = new Ball(calcRadius(), new Point(0,0), new Point(0,0));
+	balls.push(mouseBall);
+
+	balls[0].radius = calcRadius() * forceFactor;
+	balls[0].path.opacity = 0;
+	balls[0].path.isMouse = true;
+
 	for (var i = 0; i < numBalls; i++) {
 		var position = Point.random() * view.size;
 		var vector = new Point({
 			angle: 1 * Math.random(),
 			length: Math.random() * 10
 		});
-		balls.push(new Ball(calcRadius(), position, vector));
+		var currBall = new Ball(calcRadius(), position, vector);
+		currBall.path.opacity = 0.8;
+		currBall.path.artist = {
+			idx: i,
+			name: artists[i],
+			dest: '#'
+		};
+		balls.push(currBall);
 	}
 
-	balls[0].radius = calcRadius() * forceFactor;
-	balls[0].path.opacity = 0;
-	balls[0].path.isMouse = true;
+	// balls[0].radius = calcRadius() * forceFactor;
+	// balls[0].path.opacity = 0;
+	// balls[0].path.isMouse = true;
 }
 
 function onFrame() {
@@ -196,26 +225,30 @@ function onMouseMove(event) {
 	targetY = mousePos.y;
 
 	project.activeLayer.selected = false;
-	if (event.item && !event.item.isMouse){
+	if (event.item && !event.item.isMouse) {
 		event.item.selected = true;
+		$("#bg-title").text(event.item.artist.name.toUpperCase());
+	}
+	else{
+		$("#bg-title").text("NEAREST NEIGHBOR");
 	}
 
 	// for (var i = 0; i < balls.length; i++) {
-    //     for (var j = i + 1; j < balls.length; j++) {
-    //         showIntersections(balls[j].path, balls[i].path)
-    //     }
-    // }
+	//     for (var j = i + 1; j < balls.length; j++) {
+	//         showIntersections(balls[j].path, balls[i].path)
+	//     }
+	// }
 }
 
 function showIntersections(path1, path2) {
-    var intersections = path1.getIntersections(path2);
-    for (var i = 0; i < intersections.length; i++) {
-        new Path.Circle({
-            center: intersections[i].point,
-            radius: 5,
-            fillColor: '#009dec'
-        }).removeOnMove();
-    }
+	var intersections = path1.getIntersections(path2);
+	for (var i = 0; i < intersections.length; i++) {
+		new Path.Circle({
+			center: intersections[i].point,
+			radius: 5,
+			fillColor: '#009dec'
+		}).removeOnMove();
+	}
 }
 
 setup();
