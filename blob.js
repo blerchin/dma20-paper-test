@@ -151,6 +151,8 @@ var targetX = 0;
 var targetY = 0;
 var forceFactor = 2;
 var mouseBall;
+var lasHover;
+var opacity = 0.5;
 
 function calcRadius() {
 	var viewArea = view.size.width * view.size.height * 0.9;
@@ -174,7 +176,7 @@ function setup() {
 			length: Math.random() * 10
 		});
 		var currBall = new Ball(calcRadius(), position, vector);
-		currBall.path.opacity = 0.8;
+		currBall.path.opacity = opacity;
 		currBall.path.artist = {
 			idx: i,
 			name: artists[i],
@@ -226,11 +228,20 @@ function onMouseMove(event) {
 
 	project.activeLayer.selected = false;
 	if (event.item && !event.item.isMouse) {
-		event.item.selected = true;
+		for (var i = 1, l = balls.length; i < l; i++) {
+			balls[i].path.opacity = 0;
+		}
+		lasHover = event.item;
+		// event.item.selected = true;
+		event.item.opacity = 1;
 		var h1= $("#bg-title").text(event.item.artist.name.toUpperCase());
 		h1.html(h1.html().replace(/\s/g,'<br>'));
 	}
 	else{
+		lasHover.opacity = opacity;
+		for (var i = 1, l = balls.length; i < l; i++) {
+			balls[i].path.opacity = opacity;
+		}
 		var h1 = $("#bg-title").text("NEAR REST \n NEIGHBOR");
 		h1.html(h1.html().replace(/\n/g,'<br>'));
 	}
