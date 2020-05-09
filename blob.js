@@ -8,7 +8,7 @@ function Ball(r, p, v) {
 	this.dampen = 0.4;
 	this.bounce = 0;
 	this.maxVec = 15;
-	this.numSegment = Math.floor(r / 3);
+	this.numSegment = 10;
 	this.boundOffset = [];
 	this.boundOffsetBuff = [];
 	this.sidePoints = [];
@@ -85,10 +85,10 @@ Ball.prototype = {
 
 	react: function (b) {
 		var dist = this.point.getDistance(b.point);
-		if (dist < this.radius + b.radius && Math.abs(dist) > 10) {
+		if (dist < this.radius + b.radius && dist != 0) {
 			var overlap = this.radius + b.radius - dist;
 			overlap /= 10;
-			var direc = (this.point - b.point).normalize(overlap * 0.5);
+			var direc = (this.point - b.point).normalize(overlap * 0.9);
 			this.vector += direc;
 			b.vector -= direc;
 
@@ -130,56 +130,92 @@ Ball.prototype = {
 
 var balls = [];
 var numBalls = 12;
-var area = view.size.width * view.size.height * 0.5;
-var radius = Math.sqrt((area / numBalls - 1) / Math.PI);
-radius = Math.random() * 20 + radius;
+var x =0;
+var y =0;
+var mouseEasing = 0.02;
+var targetX =0;
+var targetY =0;
+var forceFactor = 1.5;
 
-for (var i = 0; i < numBalls; i++) {
-	var position = Point.random() * view.size;
-	var vector = new Point({
-		angle: 1 * Math.random(),
-		length: Math.random() * 10
-	});
-	balls.push(new Ball(radius, position, vector));
+function calcRadius() {
+	var viewArea = view.size.width * view.size.height * 0.5;
+	var radius = Math.sqrt((viewArea / numBalls - 1) / Math.PI);
+	radius = Math.random() * 20 + radius;
+	return radius;
 }
 
-balls[0].radius = radius *2;
-balls[0].path.opacity = 0;
+function setup() {
+	for (var i = 0; i < numBalls; i++) {
+		var position = Point.random() * view.size;
+		var vector = new Point({
+			angle: 1 * Math.random(),
+			length: Math.random() * 10
+		});
+		balls.push(new Ball(calcRadius(), position, vector));
+	}
 
-
-function onMouseMove(event) {
-	mousePos = event.point;
-	var y = -(mousePos.y - view.size.height / 2);
-	var x = (mousePos.x - view.size.width / 2);
-	var angle = Math.atan(y / x);
-	var uy = Math.sin(angle);
-	var ux = Math.cos(angle);
-
-	balls[0].point = mousePos;
+	balls[0].radius = calcRadius() * forceFactor;
+	balls[0].path.opacity = 0;
+	balls[0].path.isMouse = true;
 }
 
 function onFrame() {
-	for (var i = 0; i < balls.length - 1; i++) {
-		for (var j = i + 1; j < balls.length; j++) {
-			if (i == j)
-				continue;
+	for (var i = 0; i < balls.length - 1; i++)
+		for (var j = i + 1; j < balls.length; j++)
 			balls[i].react(balls[j]);
-		}
-	}
+
+
 	for (var i = 1, l = balls.length; i < l; i++) {
 		balls[i].iterate();
 		balls[i].updateColor();
 	}
 
 	balls[0].updateShape();
+
+	// Mouse Easing
+	var dx = targetX - x;
+	x += dx * mouseEasing;
+	var dy = targetY - y;
+	y += dy * mouseEasing;
+
+	// Move the hidden/mouse blob 
+	balls[0].point = new Point(x, y);
 }
 
 function onResize() {
 	for (var i = 0, l = balls.length; i < l; i++) {
-		area = view.size.width * view.size.height * 0.5;
-		radius = Math.sqrt((area / numBalls - 1) / Math.PI);
-		radius = Math.random() * 20 + radius;
-		balls[i].radius = radius;
+		balls[i].radius = calcRadius();
 	}
-	balls[0].radius = radius *2;
+	balls[0].radius = calcRadius() * forceFactor;
 }
+
+function onMouseMove(event) {
+	var mousePos = event.point;
+
+	targetX = mousePos.x;
+	targetY = mousePos.y;
+
+	project.activeLayer.selected = false;
+	if (event.item && !event.item.isMouse){
+		event.item.selected = true;
+	}
+
+	// for (var i = 0; i < balls.length; i++) {
+    //     for (var j = i + 1; j < balls.length; j++) {
+    //         showIntersections(balls[j].path, balls[i].path)
+    //     }
+    // }
+}
+
+function showIntersections(path1, path2) {
+    var intersections = path1.getIntersections(path2);
+    for (var i = 0; i < intersections.length; i++) {
+        new Path.Circle({
+            center: intersections[i].point,
+            radius: 5,
+            fillColor: '#009dec'
+        }).removeOnMove();
+    }
+}
+
+setup();
