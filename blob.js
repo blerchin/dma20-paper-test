@@ -8,7 +8,7 @@ function Ball(r, p, v) {
 	this.dampen = 0.4;
 	this.bounce = 0;
 	this.maxVec = 15;
-	this.numSegment = 10;
+	this.numSegment = 16;
 	this.boundOffset = [];
 	this.boundOffsetBuff = [];
 	this.sidePoints = [];
