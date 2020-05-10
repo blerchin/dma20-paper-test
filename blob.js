@@ -162,10 +162,10 @@ var opacity = 0.9;
 var simInProgress = true;
 var collapsed = false;
 
-function calcRadius() {
+function calcRadius(idx) {
 	var viewArea = view.size.width * view.size.height * 0.9;
 	var radius;
-	if (collapsed) {
+	if (collapsed && idx !=0) {
 		radius = view.size.width / (numBalls * 2);
 	} else {
 		radius = Math.sqrt((viewArea / numBalls) / Math.PI);
@@ -175,8 +175,8 @@ function calcRadius() {
 }
 
 function setup() {
-	mouseBall = new Ball(calcRadius(), new Point(0, 0), new Point(0, 0));
-	mouseBall.radius = calcRadius() * forceFactor;
+	mouseBall = new Ball(calcRadius(0), new Point(0, 0), new Point(0, 0));
+	mouseBall.radius = calcRadius(0) * forceFactor;
 	mouseBall.path.opacity = 0;
 	mouseBall.path.isMouse = true;
 	mouseBall.setIdx(0);
@@ -188,13 +188,14 @@ function setup() {
 			angle: 1 * Math.random(),
 			length: Math.random() * 10
 		});
-		var currBall = new Ball(calcRadius(), position, vector);
+		var currBall = new Ball(calcRadius(i), position, vector);
 		currBall.path.opacity = opacity;
 		currBall.path.artist = {
 			idx: i,
 			name: artists[i],
 			dest: '#'
 		};
+		currBall.setIdx(i);
 		currBall.path.onMouseEnter = pathOnMouseEnter;
 		currBall.path.onMouseLeave = pathOnMouseLeave;
 		balls.push(currBall);
@@ -212,6 +213,8 @@ function onFrame() {
 	}
 
 	balls[0].updateShape();
+	balls[0].updateColor();
+
 
 	// Mouse Easing
 	var easeFactor = defaultEasing;
@@ -233,9 +236,9 @@ function onFrame() {
 
 function onResize() {
 	for (var i = 0, l = balls.length; i < l; i++) {
-		balls[i].radius = calcRadius();
+		balls[i].radius = calcRadius(i);
 	}
-	balls[0].radius = calcRadius() * forceFactor;
+	balls[0].radius = calcRadius(0) * forceFactor;
 }
 
 function onMouseMove(event) {
@@ -260,7 +263,7 @@ function pathOnMouseEnter(event) {
 			balls[i].path.tween({
 					opacity: balls[i].path.opacity
 				}, {
-					opacity: 0.0
+					opacity: 0.2
 				},
 				250
 			);
@@ -303,7 +306,7 @@ function onKeyDown(event) {
 	// When a key is pressed, set the content of the text item:
 	collapsed = !collapsed;
 	for (var i = 1; i < balls.length; i++) {
-		balls[i].radius = calcRadius();
+		balls[i].radius = calcRadius(i);
 	}
 }
 
