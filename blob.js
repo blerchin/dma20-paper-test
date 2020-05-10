@@ -26,10 +26,11 @@ function Ball(r, p, v) {
 	this.boundOffset = [];
 	this.boundOffsetBuff = [];
 	this.sidePoints = [];
+	this.idx;
 	this.path = new Path({
 		fillColor: {
 			gradient: {
-				stops: ['#FEDBCF', '#4074C3'],
+				stops: ['#e3f994', '#574DC8'],
 				radial: true
 			},
 			origin: this.point,
@@ -62,6 +63,11 @@ Ball.prototype = {
 		this.vector *= this.dampen;
 		this.point += this.vector;
 		this.updateShape();
+	},
+
+	setIdx: function (val) {
+		this.idx = val;
+		this.path.idx = val;
 	},
 
 	updateColor: function () {
@@ -146,13 +152,13 @@ var balls = [];
 var numBalls = 11;
 var x = 0;
 var y = 0;
-var defaultEasing = 0.02;
+var defaultEasing = 0.03;
 var targetX = 0;
 var targetY = 0;
 var forceFactor = 1.5;
 var mouseBall;
 var lasHover;
-var opacity = 0.8;
+var opacity = 0.9;
 var simInProgress = true;
 var collapsed = false;
 
@@ -170,11 +176,11 @@ function calcRadius() {
 
 function setup() {
 	mouseBall = new Ball(calcRadius(), new Point(0, 0), new Point(0, 0));
+	mouseBall.radius = calcRadius() * forceFactor;
+	mouseBall.path.opacity = 0;
+	mouseBall.path.isMouse = true;
+	mouseBall.setIdx(0);
 	balls.push(mouseBall);
-
-	balls[0].radius = calcRadius() * forceFactor;
-	balls[0].path.opacity = 0;
-	balls[0].path.isMouse = true;
 
 	for (var i = 0; i < numBalls; i++) {
 		var position = Point.random() * view.size;
@@ -189,20 +195,16 @@ function setup() {
 			name: artists[i],
 			dest: '#'
 		};
+		currBall.path.onMouseEnter = pathOnMouseEnter;
+		currBall.path.onMouseLeave = pathOnMouseLeave;
 		balls.push(currBall);
 	}
-
-	// balls[0].radius = calcRadius() * forceFactor;
-	// balls[0].path.opacity = 0;
-	// balls[0].path.isMouse = true;
 }
 
 function onFrame() {
-
 	for (var i = 0; i < balls.length - 1; i++)
 		for (var j = i + 1; j < balls.length; j++)
 			balls[i].react(balls[j]);
-
 
 	for (var i = 1; i < balls.length; i++) {
 		balls[i].iterate();
@@ -211,12 +213,10 @@ function onFrame() {
 
 	balls[0].updateShape();
 
-
-
 	// Mouse Easing
 	var easeFactor = defaultEasing;
 	if (!simInProgress) {
-		easeFactor /= 10;
+		easeFactor /= 30;
 	}
 	var dx = targetX - x;
 	x += dx * easeFactor;
@@ -224,10 +224,9 @@ function onFrame() {
 	y += dy * easeFactor;
 
 	// Move the hidden/mouse blob 
-	if (collapsed){
-		balls[0].point = new Point(0, 0);
-	}
-	else{
+	if (collapsed) {
+		balls[0].point = new Point(-balls[0].radius, -balls[0].radius);
+	} else {
 		balls[0].point = new Point(x, y);
 	}
 }
@@ -247,26 +246,6 @@ function onMouseMove(event) {
 
 	project.activeLayer.selected = false;
 
-	if (event.item && !event.item.isMouse) {
-		simInProgress = false;
-		for (var i = 1; i < balls.length; i++) {
-			balls[i].path.opacity = 0;
-		}
-		lasHover = event.item;
-		// event.item.selected = true;
-		event.item.opacity = 1;
-		var h1 = $("#bg-title").text(event.item.artist.name.toUpperCase());
-		h1.html(h1.html().replace(/\s/g, '<br>'));
-	} else if (lasHover) {
-		simInProgress = true;
-		lasHover.opacity = opacity;
-		for (var i = 1, l = balls.length; i < l; i++) {
-			balls[i].path.opacity = opacity;
-		}
-		var h1 = $("#bg-title").text("NEARREST \n NEIGHBOR");
-		h1.html(h1.html().replace(/\n/g, '<br>'));
-	}
-
 	// for (var i = 0; i < balls.length; i++) {
 	//     for (var j = i + 1; j < balls.length; j++) {
 	//         showIntersections(balls[j].path, balls[i].path)
@@ -274,12 +253,57 @@ function onMouseMove(event) {
 	// }
 }
 
+function pathOnMouseEnter(event) {
+	simInProgress = false;
+	for (var i = 1; i < balls.length; i++) {
+		if (balls[i].path != this) {
+			balls[i].path.tween({
+					opacity: balls[i].path.opacity
+				}, {
+					opacity: 0.0
+				},
+				250
+			);
+		} else {
+			balls[i].path.tween({
+					opacity: balls[i].path.opacity
+				}, {
+					opacity: 1
+				},
+				250
+			);
+		}
+	}
+
+	// lasHover = this;
+
+	var h1 = $("#bg-title")
+	h1.text(event.target.artist.name.toUpperCase());
+	h1.html(h1.html().replace(/\s/g, '<br>'));
+}
+
+function pathOnMouseLeave(event) {
+	simInProgress = true;
+	// lasHover.opacity = opacity;
+	for (var i = 1, l = balls.length; i < l; i++) {
+		balls[i].path.tween({
+				opacity: balls[i].path.opacity
+			}, {
+				opacity: opacity
+			},
+			250
+		);
+	}
+	var h1 = $("#bg-title")
+	h1.text("NEARREST \n NEIGHBOR");
+	h1.html(h1.html().replace(/\n/g, '<br>'));
+}
+
 function onKeyDown(event) {
 	// When a key is pressed, set the content of the text item:
 	collapsed = !collapsed;
 	for (var i = 1; i < balls.length; i++) {
 		balls[i].radius = calcRadius();
-		// balls[i].updateColor();
 	}
 }
 

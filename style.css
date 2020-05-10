@@ -1,7 +1,7 @@
 body {
 	margin: 0;
 	padding: 0;
-	background: #4175C3;
+	background: #574DC8;
 }
 
 canvas {
@@ -26,7 +26,7 @@ canvas {
 	margin: 0;
 	font-size: 17vw;
 	font-family: sans-serif;
-	color: #FEDBCF;
+	color: #e3f994;
 	line-height: 17vw;
 	width: 100%;
 	text-align: center;
