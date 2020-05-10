@@ -149,16 +149,22 @@ var y = 0;
 var defaultEasing = 0.02;
 var targetX = 0;
 var targetY = 0;
-var forceFactor =1.5;
+var forceFactor = 1.5;
 var mouseBall;
 var lasHover;
 var opacity = 0.8;
 var simInProgress = true;
+var collapsed = false;
 
 function calcRadius() {
 	var viewArea = view.size.width * view.size.height * 0.9;
-	var radius = Math.sqrt((viewArea / numBalls) / Math.PI);
-	radius = Math.random() * 20 + radius;
+	var radius;
+	if (collapsed) {
+		radius = view.size.width / (numBalls * 2);
+	} else {
+		radius = Math.sqrt((viewArea / numBalls) / Math.PI);
+		radius = Math.random() * 20 + radius;
+	}
 	return radius;
 }
 
@@ -198,7 +204,7 @@ function onFrame() {
 			balls[i].react(balls[j]);
 
 
-	for (var i = 1, l = balls.length; i < l; i++) {
+	for (var i = 1; i < balls.length; i++) {
 		balls[i].iterate();
 		balls[i].updateColor();
 	}
@@ -238,7 +244,7 @@ function onMouseMove(event) {
 
 	if (event.item && !event.item.isMouse) {
 		simInProgress = false;
-		for (var i = 1, l = balls.length; i < l; i++) {
+		for (var i = 1; i < balls.length; i++) {
 			balls[i].path.opacity = 0;
 		}
 		lasHover = event.item;
@@ -246,7 +252,7 @@ function onMouseMove(event) {
 		event.item.opacity = 1;
 		var h1 = $("#bg-title").text(event.item.artist.name.toUpperCase());
 		h1.html(h1.html().replace(/\s/g, '<br>'));
-	} else {
+	} else if (lasHover) {
 		simInProgress = true;
 		lasHover.opacity = opacity;
 		for (var i = 1, l = balls.length; i < l; i++) {
@@ -261,6 +267,15 @@ function onMouseMove(event) {
 	//         showIntersections(balls[j].path, balls[i].path)
 	//     }
 	// }
+}
+
+function onKeyDown(event) {
+	// When a key is pressed, set the content of the text item:
+	collapsed = !collapsed;
+	for (var i = 1; i < balls.length; i++) {
+		balls[i].radius = calcRadius();
+		// balls[i].updateColor();
+	}
 }
 
 function showIntersections(path1, path2) {
