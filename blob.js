@@ -1,6 +1,7 @@
 // kynd.info 2014
 
 var artists = [
+	"",
 	"Zeynep Abes",
 	"Graham Akins",
 	"Berfin Ataman",
@@ -26,6 +27,8 @@ function Ball(r, p, v) {
 	this.boundOffset = [];
 	this.boundOffsetBuff = [];
 	this.sidePoints = [];
+	this.mouseEnterPt;
+	this.mouseLeavePt;
 	this.idx;
 	this.path = new Path({
 		fillColor: {
@@ -161,11 +164,12 @@ var lasHover;
 var opacity = 0.9;
 var simInProgress = true;
 var collapsed = false;
+var viewRatio = 0.9;
 
 function calcRadius(idx) {
-	var viewArea = view.size.width * view.size.height * 0.9;
+	var viewArea = view.size.width * view.size.height * viewRatio;
 	var radius;
-	if (collapsed && idx !=0) {
+	if (collapsed && idx != 0) {
 		radius = view.size.width / (numBalls * 2);
 	} else {
 		radius = Math.sqrt((viewArea / numBalls) / Math.PI);
@@ -182,7 +186,7 @@ function setup() {
 	mouseBall.setIdx(0);
 	balls.push(mouseBall);
 
-	for (var i = 0; i < numBalls; i++) {
+	for (var i = 1; i < numBalls + 1; i++) {
 		var position = Point.random() * view.size;
 		var vector = new Point({
 			angle: 1 * Math.random(),
@@ -198,6 +202,7 @@ function setup() {
 		currBall.setIdx(i);
 		currBall.path.onMouseEnter = pathOnMouseEnter;
 		currBall.path.onMouseLeave = pathOnMouseLeave;
+		currBall.path.onClick = pathOnClick;
 		balls.push(currBall);
 	}
 }
@@ -258,6 +263,10 @@ function onMouseMove(event) {
 
 function pathOnMouseEnter(event) {
 	simInProgress = false;
+
+	idx = this.idx
+	balls[idx].mouseEnterPt = event.point;
+
 	for (var i = 1; i < balls.length; i++) {
 		if (balls[i].path != this) {
 			balls[i].path.tween({
@@ -288,6 +297,15 @@ function pathOnMouseEnter(event) {
 function pathOnMouseLeave(event) {
 	simInProgress = true;
 	// lasHover.opacity = opacity;
+	idx = this.idx
+	balls[idx].mouseLeavePt = event.point;
+
+	if (!collapsed) {
+		var repulsionV = balls[idx].mouseEnterPt - balls[idx].mouseLeavePt;
+		balls[idx].vector += repulsionV.normalize() * balls[idx].radius;
+	}
+
+
 	for (var i = 1, l = balls.length; i < l; i++) {
 		balls[i].path.tween({
 				opacity: balls[i].path.opacity
@@ -297,9 +315,17 @@ function pathOnMouseLeave(event) {
 			250
 		);
 	}
+
 	var h1 = $("#bg-title")
 	h1.text("NEARREST \n NEIGHBOR");
 	h1.html(h1.html().replace(/\n/g, '<br>'));
+}
+
+function pathOnClick() {
+	collapsed = !collapsed;
+	for (var i = 1; i < balls.length; i++) {
+		balls[i].radius = calcRadius(i);
+	}
 }
 
 function onKeyDown(event) {
