@@ -224,7 +224,12 @@ function onFrame() {
 	y += dy * easeFactor;
 
 	// Move the hidden/mouse blob 
-	balls[0].point = new Point(x, y);
+	if (collapsed){
+		balls[0].point = new Point(0, 0);
+	}
+	else{
+		balls[0].point = new Point(x, y);
+	}
 }
 
 function onResize() {
