@@ -29,7 +29,7 @@ function Ball(r, p, v) {
 	this.path = new Path({
 		fillColor: {
 			gradient: {
-				stops: ['white', '#333'],
+				stops: ['#FEDBCF', '#4074C3'],
 				radial: true
 			},
 			origin: this.point,
@@ -152,7 +152,7 @@ var targetY = 0;
 var forceFactor =1.5;
 var mouseBall;
 var lasHover;
-var opacity = 0.7;
+var opacity = 0.8;
 var simInProgress = true;
 
 function calcRadius() {
@@ -252,7 +252,7 @@ function onMouseMove(event) {
 		for (var i = 1, l = balls.length; i < l; i++) {
 			balls[i].path.opacity = opacity;
 		}
-		var h1 = $("#bg-title").text("NEAR REST \n NEIGHBOR");
+		var h1 = $("#bg-title").text("NEARREST \n NEIGHBOR");
 		h1.html(h1.html().replace(/\n/g, '<br>'));
 	}
 
