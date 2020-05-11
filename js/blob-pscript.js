@@ -292,9 +292,10 @@ function pathOnMouseEnter(event) {
 
 	// lasHover = this;
 
-	var h1 = $("#bg-title")
-	h1.text(event.target.artist.name.toUpperCase());
-	h1.html(h1.html().replace(/\s/g, '<br>'));
+	var str = event.target.artist.name.toUpperCase();
+	str = str.replace(/\s/g, '<br>');
+	var h1 = document.getElementById("bg-title");
+	h1.innerHTML = str;
 }
 
 function pathOnMouseLeave(event) {
@@ -320,9 +321,10 @@ function pathOnMouseLeave(event) {
 		);
 	}
 
-	var h1 = $("#bg-title")
-	h1.text("NEARREST \n NEIGHBOR");
-	h1.html(h1.html().replace(/\n/g, '<br>'));
+	var str = "NEARREST NEIGHBOR".toUpperCase();
+	str = str.replace(/\s/g, '<br>');
+	var h1 = document.getElementById("bg-title");
+	h1.innerHTML = str;
 }
 
 function pathOnClick(event) {

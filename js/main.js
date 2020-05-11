@@ -2,7 +2,7 @@ window.onload = function () {
 	var canvas = document.getElementById('myCanvas');
 	paper.setup(canvas);
 
-	var blobs = new this.Blobs(artists);
+	var blobs = new Blobs(artists);
 	blobs.setup();
 
 	var tool = new paper.Tool();
@@ -21,5 +21,5 @@ function setBGTitle(str) {
 }
 
 function resetBGTitle() {
-	setBGTitle("NEARREST NEIGHBOR")
+	setBGTitle("NEARREST NEIGHBOR");
 }
