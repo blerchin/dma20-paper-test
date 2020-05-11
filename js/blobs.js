@@ -2,18 +2,24 @@ class Blobs {
 	constructor(artists) {
 		this.artists = artists;
 		this.balls = [];
-		this.numBalls = 11;
-		this.x = 0;
-		this.y = 0;
-		this.defaultEasing = 0.03;
-		this.targetX = 0;
-		this.targetY = 0;
-		this.forceFactor = 1.5;
+		this.numBalls = artists.length;
+		this.viewRatio = 0.75;
+		this.squeezeFactor = 0.3;
+		this.animationDuration = 250;
 		this.mouseBall = null;
+		this.mouseCurrX = 0;
+		this.mouseCurrY = 0;
+		this.mouseTargetX = 0;
+		this.mouseTargetY = 0;
+		this.mouseRadiusMultiplier = 1.5;
+		this.defaultEasing = 0.03;
+		this.slowSimEasing = this.defaultEasing / 30;
 		this.opacity = 0.8;
-		this.simInProgress = true;
+		this.hoverFadedOpacity = 0.2;
+		this.hoverActiveOpacity = 1;
+		this.isSlowSim = false;
 		this.collapsed = false;
-		this.viewRatio = 0.9;
+		this.isVertical = true;
 	}
 
 	B(idx) {
@@ -25,10 +31,11 @@ class Blobs {
 			paper.view.size.width * paper.view.size.height * this.viewRatio;
 		let radius;
 		if (this.collapsed && idx != 0) {
-			radius = paper.view.size.width / (this.numBalls * 2);
+			let totalLength = this.isVertical ? paper.view.size.height:paper.view.size.width;
+			radius = totalLength / (this.numBalls * 2);
 		} else {
 			radius = Math.sqrt(viewArea / this.numBalls / Math.PI);
-			radius = Math.random() * 20 + radius;
+			radius += Math.random() * (this.squeezeFactor * radius);
 		}
 		return radius;
 	}
@@ -39,22 +46,25 @@ class Blobs {
 			new paper.Point(0, 0),
 			new paper.Point(0, 0)
 		);
-		mouseBall.radius = this.calcRadius(0) * this.forceFactor;
+		mouseBall.radius = this.calcRadius(0) * this.mouseRadiusMultiplier;
 		mouseBall.path.opacity = 0;
 		mouseBall.path.isMouse = true;
+		mouseBall.path.isVertical = this.isVertical;
 		mouseBall.setIdx(0);
 		this.balls.push(mouseBall);
 
 		for (let i = 0; i < this.numBalls; i++) {
 			const position = paper.Point.random().multiply(paper.view.size);
-			const vector = new paper.Point({
+			const force = new paper.Point({
 				angle: 1 * Math.random(),
 				length: Math.random() * 10,
 			});
-			const currBall = new Ball(this.calcRadius(i), position, vector);
+			const currBall = new Ball(this.calcRadius(i), position, force);
 			currBall.path.opacity = this.opacity;
+			currBall.shadowColor.alpha = this.opacity/2;
 			currBall.path.artist = artists[i];
 			currBall.setIdx(this.balls.length);
+			currBall.path.verticalMode = this.isVertical;
 			currBall.path.onMouseEnter = this.pathOnMouseEnter.bind(this);
 			currBall.path.onMouseLeave = this.pathOnMouseLeave.bind(this);
 			currBall.path.onClick = this.pathOnClick.bind(this);
@@ -77,13 +87,13 @@ class Blobs {
 
 		// Mouse Easing
 		let easeFactor = this.defaultEasing;
-		if (!this.simInProgress) {
-			easeFactor /= 30;
+		if (this.isSlowSim) {
+			easeFactor = this.slowSimEasing;
 		}
-		const dx = this.targetX - this.x;
-		this.x += dx * easeFactor;
-		const dy = this.targetY - this.y;
-		this.y += dy * easeFactor;
+		const dx = this.mouseTargetX - this.mouseCurrX;
+		this.mouseCurrX += dx * easeFactor;
+		const dy = this.mouseTargetY - this.mouseCurrY;
+		this.mouseCurrY += dy * easeFactor;
 
 		// Move the hidden/mouse blob
 		if (this.collapsed) {
@@ -92,7 +102,7 @@ class Blobs {
 				-this.balls[0].radius
 			);
 		} else {
-			this.balls[0].point = new paper.Point(this.x, this.y);
+			this.balls[0].point = new paper.Point(this.mouseCurrX, this.mouseCurrY);
 		}
 	}
 
@@ -100,14 +110,14 @@ class Blobs {
 		for (let i = 0; i < this.balls.length; i++) {
 			this.balls[i].radius = this.calcRadius(i);
 		}
-		this.balls[0].radius = this.calcRadius(0) * this.forceFactor;
+		this.balls[0].radius = this.calcRadius(0) * this.mouseRadiusMultiplier;
 	}
 
 	onMouseMove(event) {
 		const mousePos = event.point;
 
-		this.targetX = mousePos.x;
-		this.targetY = mousePos.y;
+		this.mouseTargetX = mousePos.x;
+		this.mouseTargetY = mousePos.y;
 
 		// for (let i = 0; i < balls.length; i++) {
 		//     for (let j = i + 1; j < balls.length; j++) {
@@ -117,47 +127,42 @@ class Blobs {
 	}
 
 	pathOnMouseEnter(event) {
-		this.simInProgress = false;
+		this.isSlowSim = true;
 
 		const idx = event.target.idx;
-		this.B(idx).mouseEnterPt = event.point;
+		this.balls[idx].mouseEnterPt = event.point;
 
 		for (let i = 1; i < this.balls.length; i++) {
 			if (this.balls[i].path != event.target) {
 				this.balls[i].path.tween({
 						opacity: this.balls[i].path.opacity,
+						shadowColor: this.balls[i].path.shadowColor,
 					}, {
-						opacity: 0.2,
+						opacity: this.hoverFadedOpacity,
+						shadowColor: this.balls[i].shadowInactiveColor,
 					},
-					250
+					this.animationDuration
 				);
 			} else {
 				this.balls[i].path.tween({
 						opacity: this.balls[i].path.opacity,
+						// shadowColor: this.balls[i].path.shadowColor,
 					}, {
-						opacity: 1,
+						opacity: this.hoverActiveOpacity,
+						// shadowColor: this.balls[i].shadowColor,
 					},
-					250
+					this.animationDuration
 				);
 			}
 		}
 		setBGTitle(event.target.artist.name);
 	}
-	repulseBall(idx) {
-		if (!this.collapsed) {
-			const repulsionV = this.B(idx).mouseEnterPt.subtract(
-				this.B(idx).mouseLeavePt
-			);
-			this.B(idx).vector = this.B(idx).vector.add(repulsionV.normalize());
-			this.B(idx).vector = this.B(idx).vector.subtract(this.B(idx).radius);
-		}
-	}
 
 	pathOnMouseLeave(event) {
-		this.simInProgress = true;
+		this.isSlowSim = false;
 
 		const idx = event.target.idx;
-		this.B(idx).mouseLeavePt = event.point;
+		this.balls[idx].mouseLeavePt = event.point;
 
 		// Add force on mouse leave
 		// this.repulseBall(idx);
@@ -165,14 +170,26 @@ class Blobs {
 		for (let i = 1; i < this.balls.length; i++) {
 			this.balls[i].path.tween({
 					opacity: this.balls[i].path.opacity,
+					shadowColor: this.balls[i].path.shadowColor,
 				}, {
 					opacity: this.opacity,
+					shadowColor: this.balls[i].shadowInactiveColor
 				},
-				250
+				this.animationDuration
 			);
 		}
 
 		resetBGTitle();
+	}
+
+	repulseBall(idx) {
+		if (!this.collapsed) {
+			const repulsionV = this.balls[idx].mouseEnterPt.subtract(
+				this.balls[idx].mouseLeavePt
+			);
+			this.balls[idx].vector = this.balls[idx].vector.add(repulsionV.normalize());
+			this.balls[idx].vector = this.balls[idx].vector.subtract(this.balls[idx].radius);
+		}
 	}
 
 	pathOnClick(event) {
@@ -182,5 +199,10 @@ class Blobs {
 		}
 	}
 
-	onKeyDown(event) {}
+	onKeyDown(event) {
+		for (let i = 1; i < this.balls.length; i++) {
+			let curr = this.balls[i].path.blendMode;
+			this.balls[i].path.blendMode = curr == 'normal' ? 'color-burn': 'normal';
+		}
+	}
 }

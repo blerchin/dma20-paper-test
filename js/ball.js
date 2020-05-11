@@ -1,12 +1,14 @@
+// Code adapted from paperjs.org/examples/candy-crash/
+// kynd.info 2014
+
 class Ball {
 	constructor(r, p, v) {
 		this.radius = r;
 		this.point = p;
-		this.vector = v;
+		this.force = v;
 		this.gravity = 9.8;
 		this.dampen = 0.4;
-		this.bounce = 0;
-		this.maxVec = 15;
+		this.maxForce = 15;
 		this.numSegment = 16;
 		this.boundOffset = [];
 		this.boundOffsetBuff = [];
@@ -14,10 +16,17 @@ class Ball {
 		this.mouseEnterPt = null;
 		this.mouseLeavePt = null;
 		this.idx = null;
+		this.isVertical = true;
+		this.centerCol = '#e3f994';
+		this.outerCol = '#574DC8';
+		this.shadowCol = '#edebee';
+		this.shadowColor = new paper.Color(this.centerCol);
+		this.shadowInactiveColor = new paper.Color(this.outerCol);
+		this.shadowInactiveColor.alpha = 1;
 		this.path = new paper.Path({
 			fillColor: {
 				gradient: {
-					stops: ['#e3f994', '#574DC8'],
+					stops: [this.centerCol , this.outerCol],
 					radial: true,
 				},
 				origin: this.point,
@@ -25,11 +34,9 @@ class Ball {
 			},
 			blendMode: 'normal',
 			closed: true,
-			strokeColor: new paper.Color('#e3f994'),
-			strokeWidth: 2,
-			shadowColor: new paper.Color('#edebee'),
+			shadowColor: this.shadowInactiveColor,
 			shadowBlur: 5,
-			shadowOffset: new paper.Point(-6, -5),
+			shadowOffset: new paper.Point(-5, -5),
 		});
 
 		for (let i = 0; i < this.numSegment; i++) {
@@ -45,11 +52,17 @@ class Ball {
 
 	iterate() {
 		this.checkBorders();
-		if (this.vector.length > this.maxVec) this.vector.length = this.maxVec;
-		this.vector.y += this.gravity;
-		this.vector.x *= 0.99;
-		this.vector = this.vector.multiply(this.dampen);
-		this.point = this.point.add(this.vector);
+		if (this.force.length > this.maxForce) this.force.length = this.maxForce;
+		if (this.isVertical){
+			this.force.x += this.gravity;
+			this.force.y *= 0.99;
+		}
+		else{
+			this.force.y += this.gravity;
+			this.force.x *= 0.99;
+		}
+		this.force = this.force.multiply(this.dampen);
+		this.point = this.point.add(this.force);
 		this.updateShape();
 	}
 
@@ -66,9 +79,9 @@ class Ball {
 
 	checkBorders() {
 		const size = paper.view.size;
-		const pre = this.point.add(this.vector);
+		const pre = this.point.add(this.force);
 
-		const max = paper.Point.max(this.radius, this.point.add(this.vector));
+		const max = paper.Point.max(this.radius, this.point.add(this.force));
 		this.point = paper.Point.min(max, size.subtract(this.radius));
 	}
 
@@ -99,8 +112,8 @@ class Ball {
 			// overlap /= 10;
 			const direc = this.point.subtract(b.point).normalize(overlap * 0.1);
 
-			this.vector = this.vector.add(direc);
-			b.vector = b.vector.subtract(direc);
+			this.force = this.force.add(direc);
+			b.force = b.force.subtract(direc);
 
 			this.calcBounds(b);
 			b.calcBounds(this);
