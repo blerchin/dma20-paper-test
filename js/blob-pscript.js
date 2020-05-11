@@ -40,9 +40,12 @@ function Ball(r, p, v) {
 			destination: this.point + [this.radius, 0],
 		},
 		blendMode: 'normal',
-		strokeColor: '#000',
-		strokeWidth: 0,
-		closed: true
+		closed: true,
+		strokeColor: new Color('#e3f994'),
+		strokeWidth: 2,
+		shadowColor: new Color('#edebee'),
+		shadowBlur: 5,
+		shadowOffset: new Point(-6, -5),
 	});
 
 	for (var i = 0; i < this.numSegment; i++) {
@@ -300,10 +303,11 @@ function pathOnMouseLeave(event) {
 	idx = this.idx
 	balls[idx].mouseLeavePt = event.point;
 
-	if (!collapsed) {
-		var repulsionV = balls[idx].mouseEnterPt - balls[idx].mouseLeavePt;
-		balls[idx].vector += repulsionV.normalize() * balls[idx].radius;
-	}
+	// Add force on mouse leave
+	// if (!collapsed) {
+	// 	var repulsionV = balls[idx].mouseEnterPt - balls[idx].mouseLeavePt;
+	// 	balls[idx].vector += repulsionV.normalize() * balls[idx].radius;
+	// }
 
 
 	for (var i = 1, l = balls.length; i < l; i++) {
@@ -321,7 +325,8 @@ function pathOnMouseLeave(event) {
 	h1.html(h1.html().replace(/\n/g, '<br>'));
 }
 
-function pathOnClick() {
+function pathOnClick(event) {
+	console.log(event.target)
 	collapsed = !collapsed;
 	for (var i = 1; i < balls.length; i++) {
 		balls[i].radius = calcRadius(i);
