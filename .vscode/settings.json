@@ -6,6 +6,7 @@
             ".vscode/**",
             "**/*.scss",
             "**/*.sass"
-    ]
+    ],
+    "jshint.options": {"esversion": 6},
 
 }

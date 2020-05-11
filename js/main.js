@@ -1,22 +1,23 @@
 window.onload = function () {
-	var canvas = document.getElementById('myCanvas');
-	paper.setup(canvas);
+	let canvas = document.getElementById('myCanvas');
+	let tool = new paper.Tool();
+	let blobs = new Blobs(artists);
 
-	var blobs = new Blobs(artists);
+	paper.setup(canvas);
 	blobs.setup();
 
-	var tool = new paper.Tool();
+	// Using Arrow Functions for below to retain the scope of 'this'
 	tool.onMouseMove = (event) => blobs.onMouseMove(event);
 	tool.onKeyDown = (event) => blobs.onKeyDown(event);
 
 	paper.view.onFrame = (event) => blobs.onFrame(event);
 	paper.view.onResize = (event) => blobs.onResize(event);
-}
+};
 
-function setBGTitle(str) {
-	var str = str.toUpperCase();
+function setBGTitle(val) {
+	let str = val.toUpperCase();
 	str = str.replace(/\s/g, '<br>');
-	var h1 = document.getElementById("bg-title");
+	let h1 = document.getElementById("bg-title");
 	h1.innerHTML = str;
 }
 

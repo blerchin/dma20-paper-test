@@ -27,9 +27,9 @@ function Ball(r, p, v) {
 	this.boundOffset = [];
 	this.boundOffsetBuff = [];
 	this.sidePoints = [];
-	this.mouseEnterPt;
-	this.mouseLeavePt;
-	this.idx;
+	this.mouseEnterPt = null;
+	this.mouseLeavePt = null;
+	this.idx = null;
 	this.path = new Path({
 		fillColor: {
 			gradient: {

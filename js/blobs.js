@@ -1,5 +1,6 @@
 class Blobs {
 	constructor(artists) {
+		this.artists = artists;
 		this.balls = [];
 		this.numBalls = 11;
 		this.x = 0;
@@ -8,12 +9,11 @@ class Blobs {
 		this.targetX = 0;
 		this.targetY = 0;
 		this.forceFactor = 1.5;
-		this.mouseBall;
+		this.mouseBall = null;
 		this.opacity = 0.8;
 		this.simInProgress = true;
 		this.collapsed = false;
 		this.viewRatio = 0.9;
-		this.artists = artists;
 	}
 
 	B(idx) {
@@ -21,19 +21,24 @@ class Blobs {
 	}
 
 	calcRadius(idx) {
-		const viewArea = paper.view.size.width * paper.view.size.height * this.viewRatio;
+		const viewArea =
+			paper.view.size.width * paper.view.size.height * this.viewRatio;
 		let radius;
 		if (this.collapsed && idx != 0) {
 			radius = paper.view.size.width / (this.numBalls * 2);
 		} else {
-			radius = Math.sqrt((viewArea / this.numBalls) / Math.PI);
+			radius = Math.sqrt(viewArea / this.numBalls / Math.PI);
 			radius = Math.random() * 20 + radius;
 		}
 		return radius;
 	}
 
 	setup() {
-		const mouseBall = new Ball(this.calcRadius(0), new paper.Point(0, 0), new paper.Point(0, 0));
+		const mouseBall = new Ball(
+			this.calcRadius(0),
+			new paper.Point(0, 0),
+			new paper.Point(0, 0)
+		);
 		mouseBall.radius = this.calcRadius(0) * this.forceFactor;
 		mouseBall.path.opacity = 0;
 		mouseBall.path.isMouse = true;
@@ -44,7 +49,7 @@ class Blobs {
 			const position = paper.Point.random().multiply(paper.view.size);
 			const vector = new paper.Point({
 				angle: 1 * Math.random(),
-				length: Math.random() * 10
+				length: Math.random() * 10,
 			});
 			const currBall = new Ball(this.calcRadius(i), position, vector);
 			currBall.path.opacity = this.opacity;
@@ -70,7 +75,6 @@ class Blobs {
 		this.balls[0].updateShape();
 		this.balls[0].updateColor();
 
-
 		// Mouse Easing
 		let easeFactor = this.defaultEasing;
 		if (!this.simInProgress) {
@@ -81,9 +85,12 @@ class Blobs {
 		const dy = this.targetY - this.y;
 		this.y += dy * easeFactor;
 
-		// Move the hidden/mouse blob 
+		// Move the hidden/mouse blob
 		if (this.collapsed) {
-			this.balls[0].point = new paper.Point(-this.balls[0].radius, -this.balls[0].radius);
+			this.balls[0].point = new paper.Point(
+				-this.balls[0].radius,
+				-this.balls[0].radius
+			);
 		} else {
 			this.balls[0].point = new paper.Point(this.x, this.y);
 		}
@@ -102,8 +109,6 @@ class Blobs {
 		this.targetX = mousePos.x;
 		this.targetY = mousePos.y;
 
-		// project.activeLayer.selected = false;
-
 		// for (let i = 0; i < balls.length; i++) {
 		//     for (let j = i + 1; j < balls.length; j++) {
 		//         showIntersections(balls[j].path, balls[i].path)
@@ -114,23 +119,23 @@ class Blobs {
 	pathOnMouseEnter(event) {
 		this.simInProgress = false;
 
-		const idx = event.target.idx
+		const idx = event.target.idx;
 		this.B(idx).mouseEnterPt = event.point;
 
 		for (let i = 1; i < this.balls.length; i++) {
 			if (this.balls[i].path != event.target) {
 				this.balls[i].path.tween({
-						opacity: this.balls[i].path.opacity
+						opacity: this.balls[i].path.opacity,
 					}, {
-						opacity: 0.2
+						opacity: 0.2,
 					},
 					250
 				);
 			} else {
 				this.balls[i].path.tween({
-						opacity: this.balls[i].path.opacity
+						opacity: this.balls[i].path.opacity,
 					}, {
-						opacity: 1
+						opacity: 1,
 					},
 					250
 				);
@@ -140,17 +145,18 @@ class Blobs {
 	}
 	repulseBall(idx) {
 		if (!this.collapsed) {
-			const repulsionV = this.B(idx).mouseEnterPt.subtract(this.B(idx).mouseLeavePt);
+			const repulsionV = this.B(idx).mouseEnterPt.subtract(
+				this.B(idx).mouseLeavePt
+			);
 			this.B(idx).vector = this.B(idx).vector.add(repulsionV.normalize());
 			this.B(idx).vector = this.B(idx).vector.subtract(this.B(idx).radius);
 		}
-
 	}
 
 	pathOnMouseLeave(event) {
 		this.simInProgress = true;
 
-		const idx = event.target.idx
+		const idx = event.target.idx;
 		this.B(idx).mouseLeavePt = event.point;
 
 		// Add force on mouse leave
@@ -158,9 +164,9 @@ class Blobs {
 
 		for (let i = 1; i < this.balls.length; i++) {
 			this.balls[i].path.tween({
-					opacity: this.balls[i].path.opacity
+					opacity: this.balls[i].path.opacity,
 				}, {
-					opacity: this.opacity
+					opacity: this.opacity,
 				},
 				250
 			);

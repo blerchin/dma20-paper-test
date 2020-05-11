@@ -11,14 +11,14 @@ class Ball {
 		this.boundOffset = [];
 		this.boundOffsetBuff = [];
 		this.sidePoints = [];
-		this.mouseEnterPt;
-		this.mouseLeavePt;
-		this.idx;
+		this.mouseEnterPt = null;
+		this.mouseLeavePt = null;
+		this.idx = null;
 		this.path = new paper.Path({
 			fillColor: {
 				gradient: {
 					stops: ['#e3f994', '#574DC8'],
-					radial: true
+					radial: true,
 				},
 				origin: this.point,
 				destination: this.point + [this.radius, 0],
@@ -37,16 +37,15 @@ class Ball {
 			this.boundOffsetBuff.push(this.radius);
 			this.path.add(new paper.Point());
 			this.sidePoints.push(new paper.Point({
-				angle: 360 / this.numSegment * i,
-				length: 1
+				angle: (360 / this.numSegment) * i,
+				length: 1,
 			}));
 		}
 	}
 
 	iterate() {
 		this.checkBorders();
-		if (this.vector.length > this.maxVec)
-			this.vector.length = this.maxVec;
+		if (this.vector.length > this.maxVec) this.vector.length = this.maxVec;
 		this.vector.y += this.gravity;
 		this.vector.x *= 0.99;
 		this.vector = this.vector.multiply(this.dampen);
@@ -83,11 +82,12 @@ class Ball {
 			if (this.boundOffset[i] < this.radius / 4)
 				this.boundOffset[i] = this.radius / 4;
 			const next = (i + 1) % this.numSegment;
-			const prev = (i > 0) ? i - 1 : this.numSegment - 1;
+			const prev = i > 0 ? i - 1 : this.numSegment - 1;
 			let offset = this.boundOffset[i];
 
 			offset += (this.radius - offset) / 15;
-			offset += ((this.boundOffset[next] + this.boundOffset[prev]) / 2 - offset) / 3;
+			offset +=
+				((this.boundOffset[next] + this.boundOffset[prev]) / 2 - offset) / 3;
 			this.boundOffsetBuff[i] = this.boundOffset[i] = offset;
 		}
 	}
@@ -97,7 +97,7 @@ class Ball {
 		if (dist < this.radius + b.radius && dist != 0) {
 			const overlap = this.radius + b.radius - dist;
 			// overlap /= 10;
-			const direc = (this.point.subtract(b.point)).normalize(overlap * 0.1);
+			const direc = this.point.subtract(b.point).normalize(overlap * 0.1);
 
 			this.vector = this.vector.add(direc);
 			b.vector = b.vector.subtract(direc);
@@ -112,7 +112,8 @@ class Ball {
 	getBoundOffset(b) {
 		const diff = this.point.subtract(b);
 		const angle = (diff.angle + 180) % 360;
-		return this.boundOffset[Math.floor(angle / 360 * this.boundOffset.length)];
+		return this
+			.boundOffset[Math.floor((angle / 360) * this.boundOffset.length)];
 	}
 
 	calcBounds(b) {
@@ -128,8 +129,7 @@ class Ball {
 
 	getSidePoint(index) {
 		return this.point.add(
-			this.sidePoints[index].multiply(this.boundOffset[index])
-		);
+			this.sidePoints[index].multiply(this.boundOffset[index]));
 	}
 
 	updateBounds() {
