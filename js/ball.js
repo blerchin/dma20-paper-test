@@ -6,10 +6,13 @@ class Ball {
 		this.radius = r;
 		this.point = p;
 		this.force = v;
-		this.gravity = 9.8;
+		this.gravity = 9.8; // Amount of force dampening
 		this.dampen = 0.4;
 		this.maxForce = 15;
-		this.numSegment = 16;
+		this.numSegment = 16; // Curve segmentation
+		this.innerForceFactor = 0.1; // How much balls repel eachother
+		this.deformFactor = 5; // How much balls can be deformed when adjacent
+		this.shapeRetention = 15; // How responsive the deformation is
 		this.boundOffset = [];
 		this.boundOffsetBuff = [];
 		this.sidePoints = [];
@@ -17,16 +20,16 @@ class Ball {
 		this.mouseLeavePt = null;
 		this.idx = null;
 		this.isVertical = true;
-		this.centerCol = '#e3f994';
-		this.outerCol = '#574DC8';
-		this.shadowCol = '#edebee';
+		this.centerCol = '#e3f994'; // Radial gradient center color
+		this.outerCol = '#574DC8'; // Radial gradient outer color
+		this.shadowCol = '#edebee'; // Color of shadows
 		this.shadowColor = new paper.Color(this.centerCol);
 		this.shadowInactiveColor = new paper.Color(this.outerCol);
-		this.shadowInactiveColor.alpha = 1;
+		this.shadowInactiveColor.alpha = 1; // When hovered, make inactive ball's shadow fully transparent
 		this.path = new paper.Path({
 			fillColor: {
 				gradient: {
-					stops: [this.centerCol , this.outerCol],
+					stops: [this.centerCol, this.outerCol],
 					radial: true,
 				},
 				origin: this.point,
@@ -53,11 +56,10 @@ class Ball {
 	iterate() {
 		this.checkBorders();
 		if (this.force.length > this.maxForce) this.force.length = this.maxForce;
-		if (this.isVertical){
+		if (this.isVertical) {
 			this.force.x += this.gravity;
 			this.force.y *= 0.99;
-		}
-		else{
+		} else {
 			this.force.y += this.gravity;
 			this.force.x *= 0.99;
 		}
@@ -98,9 +100,9 @@ class Ball {
 			const prev = i > 0 ? i - 1 : this.numSegment - 1;
 			let offset = this.boundOffset[i];
 
-			offset += (this.radius - offset) / 15;
+			offset += (this.radius - offset) / this.shapeRetention;
 			offset +=
-				((this.boundOffset[next] + this.boundOffset[prev]) / 2 - offset) / 3;
+				((this.boundOffset[next] + this.boundOffset[prev]) / 2 - offset) / this.deformFactor;
 			this.boundOffsetBuff[i] = this.boundOffset[i] = offset;
 		}
 	}
@@ -110,7 +112,7 @@ class Ball {
 		if (dist < this.radius + b.radius && dist != 0) {
 			const overlap = this.radius + b.radius - dist;
 			// overlap /= 10;
-			const direc = this.point.subtract(b.point).normalize(overlap * 0.1);
+			const direc = this.point.subtract(b.point).normalize(overlap * this.innerForceFactor);
 
 			this.force = this.force.add(direc);
 			b.force = b.force.subtract(direc);
