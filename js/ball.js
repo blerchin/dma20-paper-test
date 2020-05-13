@@ -6,8 +6,8 @@ class Ball {
 		this.radius = r;
 		this.point = p;
 		this.force = v;
-		this.gravity = 9.8; // Amount of force dampening
-		this.dampen = 0.4;
+		this.gravity = 9.8; 
+		this.dampen = 0.4; // Amount of force dampening
 		this.maxForce = 15;
 		this.numSegment = 16; // Curve segmentation
 		this.innerForceFactor = 0.1; // How much balls repel eachother
