@@ -1,22 +1,29 @@
 .temp-container {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: center;
   width: 100%;
   height: 100%;
 }
 
-.temp-container img{
-	width: 50%;
-	max-width: 720px;
-	height: auto;
+.temp-container img {
+  width: 50%;
+  max-width: 720px;
+  height: auto;
+  padding-top: 5%;
+  padding-bottom: 5%;
 }
 
 .temp-body {
-	margin: 0;
-	padding: 0;
-	background: #efefef;
-  }
+  margin: 0;
+  padding: 0;
+  background: #efefef;
+  -ms-overflow-style: none;
+}
+
+.temp-body::-webkit-scrollbar {
+  display: none;
+}
 
 body {
   margin: 0;
