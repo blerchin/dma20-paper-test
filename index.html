@@ -28,13 +28,93 @@
 	<meta name="msapplication-navbutton-color" content="#efefef">
 	<meta name="apple-mobile-web-app-status-bar-style" content="#efefef">
 
+	<link href="//cdn-images.mailchimp.com/embedcode/horizontal-slim-10_7.css" rel="stylesheet" type="text/css">
+	<style type="text/css">
+		#mc_embed_signup {
+			background: transparent;
+			clear: left;
+			font: 14px Helvetica, Arial, sans-serif;
+			width: 100%;
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			padding-bottom: 2.5%;
+		}
 
+		#mc_embed_signup form{
+			padding: 0;
+			margin: 0;
+		}
+
+		#mc_embed_signup .button:hover {
+			background-color: white;
+			cursor: pointer;
+			color: black;
+			box-shadow: 0px 0px 50px #EFF3E6;
+		}
+
+		#mc_embed_signup .button {
+			background-color: black;
+			cursor: pointer;
+			font-weight: bolder;
+		}
+		#mc_embed_signup input.email{
+			font-weight: bolder;
+			background: black;
+			color: white;
+			border: none;
+			transition: all 0.23s ease-in-out 0s;
+		}
+
+		#mc_embed_signup input.email::placeholder{
+			transition: all 0.23s ease-in-out 0s;
+			color: rgba(255, 255, 255, 0.61);
+		}
+
+		#mc_embed_signup input.email:hover {
+			background-color: white;
+			cursor: pointer;
+			color: black;
+			box-shadow: 0px 0px 50px #EFF3E6;
+		}
+
+		#mc_embed_signup input.email:hover::placeholder {
+			cursor: pointer;
+			color: rgba(0, 0, 0, 0.425);
+		}
+
+		#mc_embed_signup input.email:focus{
+			color: black;
+			outline: none;
+			box-shadow: 0px 0px 50px #EFF3E6;
+		}
+
+	</style>
 </head>
 
 <body class="temp-body">
 	<div class="temp-container">
 		<img src="imgs/longer-720.jpg" onclick="document.documentElement.requestFullscreen()">
 	</div>
+	<!-- Begin Mailchimp Signup Form -->
+
+	<div id="mc_embed_signup">
+		<form action="https://rest.us18.list-manage.com/subscribe/post?u=a3fbae6238f138617c3d42d22&amp;id=4e11d04187"
+			method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate"
+			target="_blank" novalidate>
+			<div id="mc_embed_signup_scroll">
+
+				<input type="email" value="" name="EMAIL" class="email" id="mce-EMAIL" placeholder="EMAIL"
+					required>
+				<div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text"
+						name="b_a3fbae6238f138617c3d42d22_4e11d04187" tabindex="-1" value=""></div>
+				<div class="clear"><input type="submit" value="SUBSCRIBE" name="subscribe" id="mc-embedded-subscribe"
+						class="button"></div>
+			</div>
+		</form>
+	</div>
+
+	<!--End mc_embed_signup-->
 </body>
 
 <script>
