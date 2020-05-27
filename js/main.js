@@ -1,7 +1,7 @@
 window.onload = function () {
-	let canvas = document.getElementById('myCanvas');
-	let tool = new paper.Tool();
-	let blobs = new Blobs(artists);
+	var canvas = document.getElementById('myCanvas');
+	var tool = new paper.Tool();
+	var blobs = new Blobs(artists);
 
 	paper.setup(canvas);
 	blobs.setup();
@@ -15,9 +15,9 @@ window.onload = function () {
 };
 
 function setBGTitle(val) {
-	let str = val.toUpperCase();
+	var str = val.toUpperCase();
 	str = str.replace(/\s/g, '<br>');
-	let h1 = document.getElementById("bg-title");
+	var h1 = document.getElementById("bg-title");
 	h1.innerHTML = str;
 }
 
